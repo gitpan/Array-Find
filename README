@@ -1,0 +1,171 @@
+NAME
+    Array::Find - Find items in array, with several options
+
+VERSION
+    version 0.01
+
+SYNOPSIS
+     use Array::Find qw(find_in_array);
+     use Data::Dump;
+
+     # returns [STATUSCODE, ERRMSG, DATA]
+     my $res = find_in_array(
+         items      => [qw/a x/],
+         array      => [qw/a b d a y x/],
+         max_result => 2,
+     );
+     die $res->[1] if $res->[1] != 200;
+     dd $res->[2]; # ['a', 'a']
+
+     # find by prefix (or suffix, with/without word separator), in multiple arrays
+     dd find_in_array(
+         item       => 'a.b',
+         mode       => 'prefix',
+         word_sep   => '.',
+         arrays     => [
+             [qw/a a.b. a.b a.bb/],
+             [qw/a.b.c b.c.d/],
+         ],
+     )->[2]; # ['a.b.', 'a.b', 'a.b.c']
+
+DESCRIPTION
+    This module provides one subroutine: "find_in_array" to find items in
+    array.
+
+    This module's subroutines follow Sub::Spec convention, which explains
+    the rather weird [STATUSCODE, ERRMSG, DATA] return value. Sub::Spec
+    allows your subroutines to be straightforwardly accessed via HTTP REST
+    API and command-line (complete with options parsing, help message, and
+    bash completion), as well as other features.
+
+FUNCTIONS
+    None of the functions are exported by default, but they are exportable.
+
+  find_in_array(%args) -> [STATUSCODE, ERRMSG, RESULT]
+    Find items in array, with several options.
+
+    find_in_array looks for one or more items in one or more arrays and
+    return an array containing all or some results (empty arrayref if no
+    results found). You can specify several options, like maximum number of
+    results, maximum number of comparisons, searching by suffix/prefix, case
+    sensitivity, etc. Consult the list of arguments for more details.
+
+    Currently, items are compared using the Perl's eq operator, meaning they
+    only work with scalars and compare things asciibetically.
+
+    Returns a 3-element arrayref. STATUSCODE is 200 on success, or an error
+    code between 3xx-5xx (just like in HTTP). ERRMSG is a string containing
+    error message, RESULT is the actual result.
+
+    Arguments ("*" denotes required arguments):
+
+    *   item => *str*
+
+        Item to find.
+
+        Currently can only be scalar. See also 'items' if you want to find
+        several items at once.
+
+    *   array => *array*
+
+        Array to find items in.
+
+        See also 'arrays' if you want to find in several arrays. Array
+        elements can be undef and will only match undef.
+
+    *   arrays => *array*
+
+        Just like 'array', except several.
+
+        Use this to find several items at once.
+
+        Example: find_in_array(items => ["a", "b"], array => ["b", "a", "c",
+        "a"]) will return result ["b", "a", "a"].
+
+    *   ci => *bool* (default 0)
+
+        Set case insensitive.
+
+    *   items => *array*
+
+        Just like 'item', except several.
+
+        Use this to find several items at once. Elements can be undef if you
+        want to search for undef.
+
+        Example: find_in_array(items => ["a", "b"], array => ["b", "a", "c",
+        "a"]) will return result ["b", "a", "a"].
+
+    *   max_compare => *int*
+
+        Set maximum number of comparison.
+
+        Maximum number of elements in array(s) to look for, 0 means
+        unlimited. Finding will stop as soon as this limit is reached,
+        regardless of max_result. Example: find(item=>'a', array=>['q', 'w',
+        'e', 'a'], max_compare=>3) will not return result.
+
+    *   max_result => *int*
+
+        Set maximum number of results.
+
+        0 means unlimited (find in all elements of all arrays).
+
+        +N means find until results have N items. Example:
+        find_in_array(item=>'a', array=>['a', 'b', 'a', 'a'], max_result=>2)
+        will return result ['a', 'a'].
+
+        -N is useful when looking for multiple items (see 'items' argument).
+        It means find until N items to look for have been found. Example:
+        find_in_array(items=>['a','b'], array=>['a', 'a', 'b', 'b'],
+        max_results=>-2) will return result ['a', 'a', 'b']. As soon as 2
+        items to look for have been found it will stop.
+
+    *   mode => *str* (default "exact")
+
+        Value must be one of:
+
+         ["exact", "prefix", "suffix", "prefix|suffix", "infix", "regex"]
+
+        Comparison mode.
+
+        Exact match is the default, will only match 'ap' with 'ap'. Prefix
+        matching will also match 'ap' with 'ap', 'apple', and 'apricot'.
+        Suffix matching will match 'le' with 'le' and 'apple'. Infix will
+        only match 'ap' with 'claps' and not with 'ap', 'clap', or 'apple'.
+        Regex will regard item as a regex and perform a regex match on each
+        element of array.
+
+        See also 'word_sep' which affects prefix/prefix/infix matching.
+
+    *   shuffle => *bool*
+
+        Shuffle result.
+
+    *   word_sep => *str*
+
+        Aliases: ws
+
+        Define word separator.
+
+        If set, item and array element will be regarded as a separated
+        words. This will affect prefix/suffix/infix matching. Example, with
+        '.' as the word separator and 'a.b' as the item, prefix matching
+        will 'a.b', 'a.b.', and 'a.b.c' (but not 'a.bc'). Suffix matching
+        will match 'a.b', '.a.b', 'c.a.b' (but not 'ca.b'). Infix matching
+        will match 'c.a.b.c' and won't match 'a.b', 'a.b.c', or 'c.a.b'.
+
+SEE ALSO
+    List::Util, List::MoreUtils
+
+    Sub::Spec
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2011 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
