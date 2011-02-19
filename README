@@ -2,7 +2,7 @@ NAME
     Array::Find - Find items in array, with several options
 
 VERSION
-    version 0.02
+    version 0.03
 
 SYNOPSIS
      use Array::Find qw(find_in_array);

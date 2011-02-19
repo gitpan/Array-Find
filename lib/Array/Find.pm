@@ -1,6 +1,6 @@
 package Array::Find;
 BEGIN {
-  $Array::Find::VERSION = '0.02';
+  $Array::Find::VERSION = '0.03';
 }
 # ABSTRACT: Find items in array, with several options
 
@@ -211,50 +211,70 @@ sub find_in_array {
 
                     if ($mode_prefix) {
                         my $idx = index($el, $item);
-                        if (defined($ws)) {
-                            $match ||=
-                                # left side matches ^
-                                $idx == 0 &&
-                                # right side matches $ or
-                                ($item_len+$idx == $el_len ||
-                                # ws
-                                 index($el, $ws, $item_len+$idx) ==
-                                     $item_len+$idx);
-                        } else {
-                            $match ||= $idx == 0;
+                        if ($idx >= 0) {
+                            if (defined($ws)) {
+                                $match ||=
+                                    # left side matches ^
+                                    $idx == 0 &&
+                                    # right side matches $ or
+                                    ($item_len+$idx == $el_len ||
+                                    # ws
+                                    index($el, $ws, $item_len+$idx) ==
+                                        $item_len+$idx);
+                            } else {
+                                $match ||= $idx == 0;
+                            }
                         }
                     }
 
                     if ($mode_infix && !$match) {
                         my $idx = index($el, $item);
-                        if (defined($ws)) {
-                            $match ||=
-                                # right side matches ws
-                                index($el, $ws, $item_len+$idx) ==
-                                    $item_len+$idx &&
-                                # left-side matches ws
-                                 $idx >= $ws_len &&
-                                     index($el, $ws, $idx-$ws_len) ==
-                                         $idx-$ws_len;
-                        } else {
-                            $match ||= ($idx > 0 && $idx < $el_len-$item_len);
+                        if ($idx >= 0) {
+                            if (defined($ws)) {
+                                $match ||=
+                                    # right side matches ws
+                                    index($el, $ws, $item_len+$idx) ==
+                                        $item_len+$idx &&
+                                    # left-side matches ws
+                                    $idx >= $ws_len &&
+                                       index($el, $ws, $idx-$ws_len) ==
+                                           $idx-$ws_len;
+                            } else {
+                                print "D:idx=$idx, el_len=$el_len, item_len=$item_len\n";
+                                $match ||= $idx > 0 && $idx < $el_len-$item_len;
+                                if (!$match) {
+                                    if ($idx == 0) {
+                                        # a -> aab should match
+                                        my $idx2 = index($el, $item, 1);
+                                        $match ||= $idx2 > -1 &&
+                                            $idx2 < $el_len-$item_len;
+                                    } else {
+                                        # a -> baa should match
+                                        my $idx2 = index(substr($el, 1), $item);
+                                        $match ||= $idx2 > -1 &&
+                                            $idx2 < $el_len-$item_len-1;
+                                    }
+                                }
+                            }
                         }
                     }
 
                     if ($mode_suffix && !$match) {
                         my $idx = rindex($el, $item);
-                        if (defined($ws)) {
-                            $match ||=
-                                # right side matches $
-                                $idx == $el_len-$item_len &&
-                                # left-side matches ^ or
-                                ($idx == 0 ||
-                                # ws
-                                 $idx >= $ws_len &&
-                                     index($el, $ws, $idx-$ws_len) ==
-                                         $idx-$ws_len);
-                        } else {
-                            $match ||= $idx == $el_len-$item_len;
+                        if ($idx >= 0) {
+                            if (defined($ws)) {
+                                $match ||=
+                                    # right side matches $
+                                    $idx == $el_len-$item_len &&
+                                    # left-side matches ^ or
+                                    ($idx == 0 ||
+                                    # ws
+                                    $idx >= $ws_len &&
+                                        index($el, $ws, $idx-$ws_len) ==
+                                            $idx-$ws_len);
+                            } else {
+                                $match ||= $idx == $el_len-$item_len;
+                            }
                         }
                     }
                 }
@@ -301,7 +321,7 @@ Array::Find - Find items in array, with several options
 
 =head1 VERSION
 
-version 0.02
+version 0.03
 
 =head1 SYNOPSIS
 
