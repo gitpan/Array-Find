@@ -1,6 +1,6 @@
 package Array::Find;
 BEGIN {
-  $Array::Find::VERSION = '0.01';
+  $Array::Find::VERSION = '0.02';
 }
 # ABSTRACT: Find items in array, with several options
 
@@ -71,8 +71,8 @@ _
 
 Use this to find several items at once.
 
-Example: find_in_array(items => ["a", "b"], array => ["b", "a", "c", "a"]) will
-return result ["b", "a", "a"].
+Example: find_in_array(item => "a", arrays => [["b", "a"], ["c", "a"]]) will
+return result ["a", "a"].
 
 _
         }],
@@ -109,8 +109,10 @@ _
             summary      => "Set case insensitive",
         }],
         mode             => ['str' => {
-            in           => ['exact', 'prefix', 'suffix', 'prefix|suffix',
-                             'infix', 'regex'],
+            in           => ['exact', 'prefix', 'suffix', 'infix',
+                             'prefix|infix', 'prefix|suffix',
+                             'prefix|infix|suffix', 'infix|suffix',
+                             'regex'],
             default      => 'exact',
             summary      => "Comparison mode",
             description  => <<'_',
@@ -121,7 +123,7 @@ also match 'ap' with 'ap', 'apple', and 'apricot'. Suffix matching will match
 'ap', 'clap', or 'apple'. Regex will regard item as a regex and perform a regex
 match on each element of array.
 
-See also 'word_sep' which affects prefix/prefix/infix matching.
+See also 'word_sep' which affects prefix/suffix/infix matching.
 _
         }],
         word_sep         => ['str' => {
@@ -161,6 +163,9 @@ sub find_in_array {
 
     my $ci          = $args{ci};
     my $mode        = $args{mode} // 'exact';
+    my $mode_prefix = $mode =~ /prefix/;
+    my $mode_infix  = $mode =~ /infix/;
+    my $mode_suffix = $mode =~ /suffix/;
     my $ws          = $args{word_sep} // $args{ws};
     $ws             = undef if defined($ws) && $ws eq '';
     $ws             = lc($ws) if defined($ws) && $ci;
@@ -204,7 +209,7 @@ sub find_in_array {
                 } else {
                     my $el_len = length($el);
 
-                    if ($mode eq 'prefix' || $mode eq "prefix|suffix") {
+                    if ($mode_prefix) {
                         my $idx = index($el, $item);
                         if (defined($ws)) {
                             $match ||=
@@ -220,8 +225,23 @@ sub find_in_array {
                         }
                     }
 
-                    if ($mode eq 'suffix' || $mode eq "prefix|suffix"
-                            && !$match) {
+                    if ($mode_infix && !$match) {
+                        my $idx = index($el, $item);
+                        if (defined($ws)) {
+                            $match ||=
+                                # right side matches ws
+                                index($el, $ws, $item_len+$idx) ==
+                                    $item_len+$idx &&
+                                # left-side matches ws
+                                 $idx >= $ws_len &&
+                                     index($el, $ws, $idx-$ws_len) ==
+                                         $idx-$ws_len;
+                        } else {
+                            $match ||= ($idx > 0 && $idx < $el_len-$item_len);
+                        }
+                    }
+
+                    if ($mode_suffix && !$match) {
                         my $idx = rindex($el, $item);
                         if (defined($ws)) {
                             $match ||=
@@ -235,22 +255,6 @@ sub find_in_array {
                                          $idx-$ws_len);
                         } else {
                             $match ||= $idx == $el_len-$item_len;
-                        }
-                    }
-
-                    if ($mode eq 'infix' && !$match) {
-                        my $idx = index($el, $item);
-                        if (defined($ws)) {
-                            $match ||=
-                                # right side matches ws
-                                index($el, $ws, $item_len+$idx) ==
-                                    $item_len+$idx &&
-                                # left-side matches ws
-                                 $idx >= $ws_len &&
-                                     index($el, $ws, $idx-$ws_len) ==
-                                         $idx-$ws_len;
-                        } else {
-                            $match ||= ($idx > 0 && $idx < $el_len-$item_len);
                         }
                     }
                 }
@@ -297,7 +301,7 @@ Array::Find - Find items in array, with several options
 
 =head1 VERSION
 
-version 0.01
+version 0.02
 
 =head1 SYNOPSIS
 
@@ -332,7 +336,7 @@ This module's subroutines follow L<Sub::Spec> convention, which explains the
 rather weird [STATUSCODE, ERRMSG, DATA] return value. Sub::Spec allows your
 subroutines to be straightforwardly accessed via HTTP REST API and command-line
 (complete with options parsing, help message, and bash completion), as well as
-other features.
+provide other features.
 
 =head1 FUNCTIONS
 
@@ -380,8 +384,8 @@ Just like 'array', except several.
 
 Use this to find several items at once.
 
-Example: find_in_array(items => ["a", "b"], array => ["b", "a", "c", "a"]) will
-return result ["b", "a", "a"].
+Example: find_in_array(item => "a", arrays => [["b", "a"], ["c", "a"]]) will
+return result ["a", "a"].
 
 =item * B<ci> => I<bool> (default C<0>)
 
@@ -425,7 +429,17 @@ array=>['a', 'b', 'a', 'a'], max_result=>2) will return result ['a', 'a'].
 
 Value must be one of:
 
- ["exact", "prefix", "suffix", "prefix|suffix", "infix", "regex"]
+ [
+   "exact",
+   "prefix",
+   "suffix",
+   "infix",
+   "prefix|infix",
+   "prefix|suffix",
+   "prefix|infix|suffix",
+   "infix|suffix",
+   "regex",
+ ]
 
 
 Comparison mode.
@@ -436,7 +450,7 @@ also match 'ap' with 'ap', 'apple', and 'apricot'. Suffix matching will match
 'ap', 'clap', or 'apple'. Regex will regard item as a regex and perform a regex
 match on each element of array.
 
-See also 'word_sep' which affects prefix/prefix/infix matching.
+See also 'word_sep' which affects prefix/suffix/infix matching.
 
 =item * B<shuffle> => I<bool>
 

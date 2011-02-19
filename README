@@ -2,7 +2,7 @@ NAME
     Array::Find - Find items in array, with several options
 
 VERSION
-    version 0.01
+    version 0.02
 
 SYNOPSIS
      use Array::Find qw(find_in_array);
@@ -36,7 +36,7 @@ DESCRIPTION
     the rather weird [STATUSCODE, ERRMSG, DATA] return value. Sub::Spec
     allows your subroutines to be straightforwardly accessed via HTTP REST
     API and command-line (complete with options parsing, help message, and
-    bash completion), as well as other features.
+    bash completion), as well as provide other features.
 
 FUNCTIONS
     None of the functions are exported by default, but they are exportable.
@@ -79,8 +79,8 @@ FUNCTIONS
 
         Use this to find several items at once.
 
-        Example: find_in_array(items => ["a", "b"], array => ["b", "a", "c",
-        "a"]) will return result ["b", "a", "a"].
+        Example: find_in_array(item => "a", arrays => [["b", "a"], ["c",
+        "a"]]) will return result ["a", "a"].
 
     *   ci => *bool* (default 0)
 
@@ -125,7 +125,17 @@ FUNCTIONS
 
         Value must be one of:
 
-         ["exact", "prefix", "suffix", "prefix|suffix", "infix", "regex"]
+         [
+           "exact",
+           "prefix",
+           "suffix",
+           "infix",
+           "prefix|infix",
+           "prefix|suffix",
+           "prefix|infix|suffix",
+           "infix|suffix",
+           "regex",
+         ]
 
         Comparison mode.
 
@@ -136,7 +146,7 @@ FUNCTIONS
         Regex will regard item as a regex and perform a regex match on each
         element of array.
 
-        See also 'word_sep' which affects prefix/prefix/infix matching.
+        See also 'word_sep' which affects prefix/suffix/infix matching.
 
     *   shuffle => *bool*
 
