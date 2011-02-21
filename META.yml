@@ -15,8 +15,9 @@ meta-spec:
 name: Array-Find
 requires:
   List::Util: 0
+  Test::More: 0.96
   perl: 5.010000
 resources:
   homepage: http://search.cpan.org/dist/Array-Find/
   repository: http://github.com/sharyanto/perl-Array-Find
-version: 0.03
+version: 0.04

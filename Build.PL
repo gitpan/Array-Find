@@ -17,13 +17,14 @@ my %module_build_args = (
     'Steven Haryanto <stevenharyanto@gmail.com>'
   ],
   'dist_name' => 'Array-Find',
-  'dist_version' => '0.03',
+  'dist_version' => '0.04',
   'license' => 'perl',
   'module_name' => 'Array::Find',
   'recommends' => {},
   'recursive_test_files' => 1,
   'requires' => {
     'List::Util' => '0',
+    'Test::More' => '0.96',
     'perl' => '5.010000'
   },
   'script_files' => []

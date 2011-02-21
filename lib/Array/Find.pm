@@ -1,6 +1,6 @@
 package Array::Find;
 BEGIN {
-  $Array::Find::VERSION = '0.03';
+  $Array::Find::VERSION = '0.04';
 }
 # ABSTRACT: Find items in array, with several options
 
@@ -240,7 +240,6 @@ sub find_in_array {
                                        index($el, $ws, $idx-$ws_len) ==
                                            $idx-$ws_len;
                             } else {
-                                print "D:idx=$idx, el_len=$el_len, item_len=$item_len\n";
                                 $match ||= $idx > 0 && $idx < $el_len-$item_len;
                                 if (!$match) {
                                     if ($idx == 0) {
@@ -321,7 +320,7 @@ Array::Find - Find items in array, with several options
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 SYNOPSIS
 
