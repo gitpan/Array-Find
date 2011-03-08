@@ -1,6 +1,6 @@
 package Array::Find;
 BEGIN {
-  $Array::Find::VERSION = '0.04';
+  $Array::Find::VERSION = '0.05';
 }
 # ABSTRACT: Find items in array, with several options
 
@@ -14,9 +14,9 @@ require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(find_in_array);
 
-our %SUBS;
+our %SPEC;
 
-$SUBS{find_in_array} = {
+$SPEC{find_in_array} = {
     summary       => 'Find items in array, with several options',
     description   => <<'_',
 
@@ -145,9 +145,8 @@ _
         shuffle          => ['bool' => {
             summary      => "Shuffle result",
         }],
-
-
     },
+    result_naked => 1,
 };
 sub find_in_array {
     my %args = @_;
@@ -306,7 +305,7 @@ sub find_in_array {
         @res = shuffle(@res);
     }
 
-    [200, "OK", \@res];
+    \@res;
 }
 
 1;
@@ -320,21 +319,18 @@ Array::Find - Find items in array, with several options
 
 =head1 VERSION
 
-version 0.04
+version 0.05
 
 =head1 SYNOPSIS
 
  use Array::Find qw(find_in_array);
  use Data::Dump;
 
- # returns [STATUSCODE, ERRMSG, DATA]
- my $res = find_in_array(
+ dd find_in_array(
      items      => [qw/a x/],
      array      => [qw/a b d a y x/],
      max_result => 2,
- );
- die $res->[1] if $res->[1] != 200;
- dd $res->[2]; # ['a', 'a']
+ ); # ['a', 'a']
 
  # find by prefix (or suffix, with/without word separator), in multiple arrays
  dd find_in_array(
@@ -345,23 +341,21 @@ version 0.04
          [qw/a a.b. a.b a.bb/],
          [qw/a.b.c b.c.d/],
      ],
- )->[2]; # ['a.b.', 'a.b', 'a.b.c']
+ ); # ['a.b.', 'a.b', 'a.b.c']
 
 =head1 DESCRIPTION
 
 This module provides one subroutine: C<find_in_array> to find items in array.
 
-This module's subroutines follow L<Sub::Spec> convention, which explains the
-rather weird [STATUSCODE, ERRMSG, DATA] return value. Sub::Spec allows your
-subroutines to be straightforwardly accessed via HTTP REST API and command-line
-(complete with options parsing, help message, and bash completion), as well as
-provide other features.
+This module uses L<Sub::Spec> framework, which means you can switch from named
+arguments to positional, apply execution time limits, run the subroutine from
+the command line, etc. Refer to Sub::Spec documentation for more details.
 
 =head1 FUNCTIONS
 
 None of the functions are exported by default, but they are exportable.
 
-=head2 find_in_array(%args) -> [STATUSCODE, ERRMSG, RESULT]
+=head2 find_in_array(%args) -> RESULT
 
 
 Find items in array, with several options.
@@ -374,10 +368,6 @@ of arguments for more details.
 
 Currently, items are compared using the Perl's eq operator, meaning they only
 work with scalars and compare things asciibetically.
-
-Returns a 3-element arrayref. STATUSCODE is 200 on success, or an error code
-between 3xx-5xx (just like in HTTP). ERRMSG is a string containing error
-message, RESULT is the actual result.
 
 Arguments (C<*> denotes required arguments):
 
