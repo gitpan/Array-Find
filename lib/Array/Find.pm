@@ -1,6 +1,6 @@
 package Array::Find;
 BEGIN {
-  $Array::Find::VERSION = '0.05';
+  $Array::Find::VERSION = '0.06';
 }
 # ABSTRACT: Find items in array, with several options
 
@@ -142,6 +142,15 @@ not 'ca.b'). Infix matching will match 'c.a.b.c' and won't match 'a.b',
 
 _
         }],
+        unique           => ['bool' => {
+            summary      => "Whether to return only unique results",
+            arg_aliases  => {
+                u => {},
+            },
+            description  => <<'_',
+If set to true, results will not contain duplicate items.
+_
+        }],
         shuffle          => ['bool' => {
             summary      => "Shuffle result",
         }],
@@ -173,10 +182,13 @@ sub find_in_array {
     my $max_result  = $args{max_result};
     my $max_compare = $args{max_compare};
 
+    my $unique      = $args{unique} // 0;
+
     my $num_compare;
     my %found_items; # for tracking which items have been found, for -max_result
     my @matched_els; # to avoid matching the same array element with multi items
     my @res;
+    my %res;  # for unique
 
   FIND:
     for my $i (0..$#items) {
@@ -278,7 +290,10 @@ sub find_in_array {
                 }
 
                 if ($match) {
-                    push @res, $el0;
+                    unless ($unique && $res{$el}) {
+                        push @res, $el0;
+                    }
+                    $res{$el} = 1 if $unique;
                     $matched_els[$ia] //= [];
                     $matched_els[$ia][$iel] = 1;
                 }
@@ -319,7 +334,7 @@ Array::Find - Find items in array, with several options
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -331,6 +346,14 @@ version 0.05
      array      => [qw/a b d a y x/],
      max_result => 2,
  ); # ['a', 'a']
+
+ # return unique results
+ dd find_in_array(
+     items      => [qw/a x/],
+     array      => [qw/a b d a y x/],
+     max_result => 2,
+     unique     => 1,
+ ); # ['a', 'x']
 
  # find by prefix (or suffix, with/without word separator), in multiple arrays
  dd find_in_array(
@@ -464,6 +487,14 @@ See also 'word_sep' which affects prefix/suffix/infix matching.
 =item * B<shuffle> => I<bool>
 
 Shuffle result.
+
+=item * B<unique> => I<bool>
+
+Aliases: B<u>
+
+Whether to return only unique results.
+
+If set to true, results will not contain duplicate items.
 
 =item * B<word_sep> => I<str>
 

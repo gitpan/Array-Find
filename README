@@ -2,7 +2,7 @@ NAME
     Array::Find - Find items in array, with several options
 
 VERSION
-    version 0.05
+    version 0.06
 
 SYNOPSIS
      use Array::Find qw(find_in_array);
@@ -13,6 +13,14 @@ SYNOPSIS
          array      => [qw/a b d a y x/],
          max_result => 2,
      ); # ['a', 'a']
+
+     # return unique results
+     dd find_in_array(
+         items      => [qw/a x/],
+         array      => [qw/a b d a y x/],
+         max_result => 2,
+         unique     => 1,
+     ); # ['a', 'x']
 
      # find by prefix (or suffix, with/without word separator), in multiple arrays
      dd find_in_array(
@@ -143,6 +151,14 @@ FUNCTIONS
     *   shuffle => *bool*
 
         Shuffle result.
+
+    *   unique => *bool*
+
+        Aliases: u
+
+        Whether to return only unique results.
+
+        If set to true, results will not contain duplicate items.
 
     *   word_sep => *str*
 
