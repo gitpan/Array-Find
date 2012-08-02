@@ -1,8 +1,4 @@
 package Array::Find;
-BEGIN {
-  $Array::Find::VERSION = '0.06';
-}
-# ABSTRACT: Find items in array, with several options
 
 use 5.010;
 use strict;
@@ -13,6 +9,8 @@ use List::Util qw(shuffle);
 require Exporter;
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(find_in_array);
+
+our $VERSION = '0.07'; # VERSION
 
 our %SPEC;
 
@@ -324,8 +322,11 @@ sub find_in_array {
 }
 
 1;
+# ABSTRACT: Find items in array, with several options
 
 
+
+__END__
 =pod
 
 =head1 NAME
@@ -334,7 +335,7 @@ Array::Find - Find items in array, with several options
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -370,20 +371,31 @@ version 0.06
 
 This module provides one subroutine: C<find_in_array> to find items in array.
 
-This module uses L<Sub::Spec> framework, which means you can switch from named
-arguments to positional, apply execution time limits, run the subroutine from
-the command line, etc. Refer to Sub::Spec documentation for more details.
+This module has L<Rinci> metadata.
 
 =head1 FUNCTIONS
 
 None of the functions are exported by default, but they are exportable.
 
-=head2 find_in_array(%args) -> RESULT
+=head1 SEE ALSO
 
+L<List::Util>, L<List::MoreUtils>
+
+=head1 DESCRIPTION
+
+
+This module has L<Rinci> metadata.
+
+=head1 FUNCTIONS
+
+
+None are exported by default, but they are exportable.
+
+=head2 find_in_array(%args) -> any
 
 Find items in array, with several options.
 
-find_in_array looks for one or more items in one or more arrays and return an
+findI<in>array looks for one or more items in one or more arrays and return an
 array containing all or some results (empty arrayref if no results found). You
 can specify several options, like maximum number of results, maximum number of
 comparisons, searching by suffix/prefix, case sensitivity, etc. Consult the list
@@ -392,16 +404,9 @@ of arguments for more details.
 Currently, items are compared using the Perl's eq operator, meaning they only
 work with scalars and compare things asciibetically.
 
-Arguments (C<*> denotes required arguments):
+Arguments ('*' denotes required arguments):
 
 =over 4
-
-=item * B<item> => I<str>
-
-Item to find.
-
-Currently can only be scalar. See also 'items' if you want to find several items
-at once.
 
 =item * B<array> => I<array>
 
@@ -416,12 +421,19 @@ Just like 'array', except several.
 
 Use this to find several items at once.
 
-Example: find_in_array(item => "a", arrays => [["b", "a"], ["c", "a"]]) will
+Example: findI<in>array(item => "a", arrays => [["b", "a"], ["c", "a"]]) will
 return result ["a", "a"].
 
-=item * B<ci> => I<bool> (default C<0>)
+=item * B<ci> => I<bool> (default: 0)
 
 Set case insensitive.
+
+=item * B<item> => I<str>
+
+Item to find.
+
+Currently can only be scalar. See also 'items' if you want to find several items
+at once.
 
 =item * B<items> => I<array>
 
@@ -430,7 +442,7 @@ Just like 'item', except several.
 Use this to find several items at once. Elements can be undef if you want to
 search for undef.
 
-Example: find_in_array(items => ["a", "b"], array => ["b", "a", "c", "a"]) will
+Example: findI<in>array(items => ["a", "b"], array => ["b", "a", "c", "a"]) will
 return result ["b", "a", "a"].
 
 =item * B<max_compare> => I<int>
@@ -438,8 +450,8 @@ return result ["b", "a", "a"].
 Set maximum number of comparison.
 
 Maximum number of elements in array(s) to look for, 0 means unlimited. Finding
-will stop as soon as this limit is reached, regardless of max_result. Example:
-find(item=>'a', array=>['q', 'w', 'e', 'a'], max_compare=>3) will not return
+will stop as soon as this limit is reached, regardless of maxI<result. Example:
+find(item=>'a', array=>['q', 'w', 'e', 'a'], max>compare=>3) will not return
 result.
 
 =item * B<max_result> => I<int>
@@ -448,31 +460,16 @@ Set maximum number of results.
 
 0 means unlimited (find in all elements of all arrays).
 
-+N means find until results have N items. Example: find_in_array(item=>'a',
++N means find until results have N items. Example: findI<in>array(item=>'a',
 array=>['a', 'b', 'a', 'a'], max_result=>2) will return result ['a', 'a'].
 
 -N is useful when looking for multiple items (see 'items' argument). It means
  find until N items to look for have been found. Example:
- find_in_array(items=>['a','b'], array=>['a', 'a', 'b', 'b'], max_results=>-2)
+ findI<in>array(items=>['a','b'], array=>['a', 'a', 'b', 'b'], max_results=>-2)
  will return result ['a', 'a', 'b']. As soon as 2 items to look for have been
  found it will stop.
 
-=item * B<mode> => I<str> (default C<"exact">)
-
-Value must be one of:
-
- [
-   "exact",
-   "prefix",
-   "suffix",
-   "infix",
-   "prefix|infix",
-   "prefix|suffix",
-   "prefix|infix|suffix",
-   "infix|suffix",
-   "regex",
- ]
-
+=item * B<mode> => I<str> (default: "exact")
 
 Comparison mode.
 
@@ -490,15 +487,11 @@ Shuffle result.
 
 =item * B<unique> => I<bool>
 
-Aliases: B<u>
-
 Whether to return only unique results.
 
 If set to true, results will not contain duplicate items.
 
 =item * B<word_sep> => I<str>
-
-Aliases: B<ws>
 
 Define word separator.
 
@@ -511,11 +504,7 @@ not 'ca.b'). Infix matching will match 'c.a.b.c' and won't match 'a.b',
 
 =back
 
-=head1 SEE ALSO
-
-L<List::Util>, L<List::MoreUtils>
-
-L<Sub::Spec>
+Return value:
 
 =head1 AUTHOR
 
@@ -523,14 +512,10 @@ Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Steven Haryanto.
+This software is copyright (c) 2012 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
 
